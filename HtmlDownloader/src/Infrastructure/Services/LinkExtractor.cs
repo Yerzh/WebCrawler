@@ -3,17 +3,23 @@ using HtmlAgilityPack;
 
 namespace Infrastructure.Services;
 
-public class HtmlParser : IHtmlParser
+public class LinkExtractor : ILinkExtractor
 {
-    public async Task ParseAsync(string pageUrl)
+    public async Task<IList<string>> ExtractAsync(string pageUrl, CancellationToken cancellationToken)
     {
-        var web = new HtmlWeb();
-        var htmlDoc = await web.LoadFromWebAsync(pageUrl);
-        var urls = ExtractUrlsFromPage(htmlDoc);
-
+        try
+        {
+            var web = new HtmlWeb();
+            var htmlDoc = await web.LoadFromWebAsync(pageUrl, cancellationToken);
+            return ExtractLinks(htmlDoc);
+        }
+        catch
+        {
+            return Enumerable.Empty<string>().ToList();
+        }
     }
 
-    private static IList<string> ExtractUrlsFromPage(HtmlDocument doc)
+    private IList<string> ExtractLinks(HtmlDocument doc)
     {
         var result = new List<string>();
 
