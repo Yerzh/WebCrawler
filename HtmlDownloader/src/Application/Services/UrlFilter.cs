@@ -1,15 +1,12 @@
-﻿using Domain.Services;
+﻿using Domain.Interfaces;
 
-namespace Infrastructure.Services;
+namespace Application.Services;
 
 public class UrlFilter : IUrlFilter
 {
     private static readonly string[] hrefsFilters = ["mailto:", "tel:", "javascript:", "#"];
 
     private static readonly string[] allowedSchemes = ["http", "https"];
-
-    private static readonly Func<Uri, Uri, Uri> convertToAbsoluteUri = (baseUri, relativeUri)
-        => !relativeUri.IsAbsoluteUri ? new Uri(baseUri, relativeUri) : relativeUri;
 
     public IList<Uri> FilterUrls(IList<string> urls, string baseUrl)
     {
@@ -21,4 +18,7 @@ public class UrlFilter : IUrlFilter
             .Where(uri => allowedSchemes.Contains(uri.Scheme))
             .ToList();
     }
+
+    private static readonly Func<Uri, Uri, Uri> convertToAbsoluteUri = (baseUri, relativeUri)
+        => !relativeUri.IsAbsoluteUri ? new Uri(baseUri, relativeUri) : relativeUri;
 }

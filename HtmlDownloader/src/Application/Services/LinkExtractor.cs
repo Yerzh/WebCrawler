@@ -1,7 +1,7 @@
-﻿using Domain.Services;
+﻿using Domain.Interfaces;
 using HtmlAgilityPack;
 
-namespace Infrastructure.Services;
+namespace Application.Services;
 
 public class LinkExtractor : ILinkExtractor
 {
