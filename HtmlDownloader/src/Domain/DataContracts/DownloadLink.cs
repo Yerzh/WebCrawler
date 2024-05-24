@@ -1,0 +1,10 @@
+﻿namespace Domain.DataContracts;
+
+public record DownloadLink
+{
+    public required Guid Id { get; init; } = Guid.NewGuid();
+
+    public required string Type { get; init; }
+
+    public required string Url { get; init; }
+}
