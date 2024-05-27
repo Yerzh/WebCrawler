@@ -1,4 +1,7 @@
+using Api.Dtos;
+using Api.Mappers;
 using Application;
+using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,11 +22,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/weatherforecast", () =>
+app.MapPost("/seed", async (DownloadLinkRequest request, IPublishEndpoint publishEndpoint) =>
 {
+    var contract = request.MapToContract();
 
+    await publishEndpoint.Publish(contract);
+
+    return Results.Created($"/downloadLinks/{contract.Id}", request);
 })
-.WithName("GetWeatherForecast")
+.WithName("LinkSeeder")
 .WithOpenApi();
 
 app.Run();
