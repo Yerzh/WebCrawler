@@ -6,3 +6,22 @@ services:
     build:
       context: .
       dockerfile: Api/Dockerfile
+    networks:
+      - webscrapper
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: "rabbitmq"
+    ports:
+      - "15672:15672" # Management UI
+      - "5672:5672"   # Default RabbitMQ Port
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - webscrapper
+    restart: unless-stopped
+
+networks:
+  webscrapper:
+    driver: bridge 
