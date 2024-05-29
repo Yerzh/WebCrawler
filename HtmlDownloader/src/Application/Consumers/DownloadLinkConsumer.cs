@@ -10,15 +10,15 @@ public class DownloadLinkConsumer : IConsumer<DownloadLink>
     private static ConcurrentBag<Uri> _alreadySeen = new();
     private readonly ILinkExtractor _linkExtractor;
     private readonly IUrlFilter _urlFilter;
-    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IBus _messageBus;
 
     public DownloadLinkConsumer(ILinkExtractor linkExtractor,
         IUrlFilter urlFilter,
-        IPublishEndpoint sendEndpoint)
+        IBus messageBus)
     {
         _linkExtractor = linkExtractor;
         _urlFilter = urlFilter;
-        _publishEndpoint = sendEndpoint;
+        _messageBus = messageBus;
     }
 
     public async Task Consume(ConsumeContext<DownloadLink> context)
@@ -56,7 +56,7 @@ public class DownloadLinkConsumer : IConsumer<DownloadLink>
                 continue;
             _alreadySeen.Add(childLink);
 
-            await _publishEndpoint.Publish(new DownloadLink()
+            await _messageBus.Publish(new DownloadLink()
             {
                 Type = childLink.GetLeftPart(UriPartial.Authority),
                 Url = childLink.OriginalString

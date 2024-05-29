@@ -1,4 +1,5 @@
 ﻿using Application.Consumers;
+using Application.RabbitMq;
 using Application.Services;
 using Domain.DataContracts;
 using Domain.Interfaces;
@@ -10,7 +11,7 @@ namespace Application;
 
 public static class ServiceRegistration
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services, RabbitMQConfig rabbitMQConfig)
     {
         services.AddMassTransit(x =>
         {
@@ -20,31 +21,28 @@ public static class ServiceRegistration
 
             x.UsingRabbitMq((context, cfg) =>
             {
-                cfg.Host("localhost", "/", h =>
-                {
-                    h.Username("guest");
-                    h.Password("guest");
-                });
+                //cfg.Host(rabbitMQConfig.Host, rabbitMQConfig.VirtualHost, h =>
+                //{
+                //    h.Username(rabbitMQConfig.Username);
+                //    h.Password(rabbitMQConfig.Password);
+                //});
 
-                cfg.PrefetchCount = 1;
+                //cfg.PrefetchCount = 1;
 
-                cfg.Send<DownloadLink>(x =>
-                {
-                    // use customerType for the routing key
-                    x.UseRoutingKeyFormatter(context => context.Message.Type);
+                //cfg.Send<DownloadLink>(x =>
+                //{
+                //    // use customerType for the routing key
+                //    x.UseRoutingKeyFormatter(context => context.Message.Type);
 
-                    // multiple conventions can be set, in this case also CorrelationId
-                    x.UseCorrelationId(context => context.Id);
-                });
+                //    // multiple conventions can be set, in this case also CorrelationId
+                //    x.UseCorrelationId(context => context.Id);
+                //});
 
-                // Keeping in mind that the default exchange config for your published type will be the full typename of your message
-                // we explicitly specify which exchange the message will be published to. So it lines up with the exchange we are binding our
-                // consumers too.
-                cfg.Message<DownloadLink>(x => x.SetEntityName("download_link"));
+                //cfg.Message<DownloadLink>(x => x.SetEntityName("downloadlink"));
 
-                // Also if your publishing your message: because publishing a message will, by default, send it to a fanout queue.
-                // We specify that we are sending it to a direct queue instead. In order for the routingkeys to take effect.
-                cfg.Publish<DownloadLink>(x => x.ExchangeType = ExchangeType.Direct);
+                //cfg.Publish<DownloadLink>(x => x.ExchangeType = ExchangeType.Direct);
+
+                cfg.ConfigureEndpoints(context);
             });
         });
 

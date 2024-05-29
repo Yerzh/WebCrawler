@@ -1,15 +1,18 @@
 using Api.Dtos;
 using Api.Mappers;
 using Application;
+using Application.RabbitMq;
 using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var rabbitMQConfig = builder.Configuration.GetSection("RabbitMQ").Get<RabbitMQConfig>();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddApplicationServices();
+builder.Services.AddApplicationServices(rabbitMQConfig!);
 
 var app = builder.Build();
 
@@ -22,11 +25,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapPost("/seed", async (DownloadLinkRequest request, IPublishEndpoint publishEndpoint) =>
+app.MapPost("/seed", async (DownloadLinkRequest request, IBus messageBus) =>
 {
     var contract = request.MapToContract();
 
-    await publishEndpoint.Publish(contract);
+    await messageBus.Publish(contract);
 
     return Results.Created($"/downloadLinks/{contract.Id}", request);
 })

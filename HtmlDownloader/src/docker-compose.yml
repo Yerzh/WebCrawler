@@ -1,27 +1,21 @@
 version: '3.4'
 
 services:
-  api:
-    image: ${DOCKER_REGISTRY-}api
+  web-api:
+    container_name: web-api
+    image: web-api
     build:
       context: .
       dockerfile: Api/Dockerfile
-    networks:
-      - webscrapper
+    depends_on:
+      - rabbitmq
 
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: "rabbitmq"
+    container_name: rabbitmq
     ports:
       - "15672:15672" # Management UI
       - "5672:5672"   # Default RabbitMQ Port
     volumes:
       - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
       - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
-    networks:
-      - webscrapper
-    restart: unless-stopped
-
-networks:
-  webscrapper:
-    driver: bridge 
