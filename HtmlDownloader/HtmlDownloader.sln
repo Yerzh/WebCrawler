@@ -9,9 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Infrastru
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application", "Application\Application.csproj", "{960513F1-7623-4858-8815-A648415D17D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api", "Api\Api.csproj", "{209F4744-0FBE-430F-835C-38C929A70681}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api", "Api\Api.csproj", "{209F4744-0FBE-430F-835C-38C929A70681}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{406A281A-644B-48D0-A611-BD4714327DF4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F709F2C5-25F3-4D9D-9185-3A95F1DAE1BA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +44,12 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F32DFDD6-889F-4B97-A380-49706AAA0381} = {F709F2C5-25F3-4D9D-9185-3A95F1DAE1BA}
+		{D87E46ED-5433-4877-AED5-E9AF4809FD3A} = {F709F2C5-25F3-4D9D-9185-3A95F1DAE1BA}
+		{960513F1-7623-4858-8815-A648415D17D4} = {F709F2C5-25F3-4D9D-9185-3A95F1DAE1BA}
+		{209F4744-0FBE-430F-835C-38C929A70681} = {F709F2C5-25F3-4D9D-9185-3A95F1DAE1BA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {69352EEF-2D75-4C66-B4CA-2058DC41B135}

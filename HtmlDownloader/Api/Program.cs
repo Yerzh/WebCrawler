@@ -1,7 +1,8 @@
 using Api.Dtos;
 using Api.Mappers;
 using Application;
-using Application.RabbitMq;
+using Infrastructure;
+using Infrastructure.RabbitMq;
 using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,7 +13,8 @@ var rabbitMQConfig = builder.Configuration.GetSection("RabbitMQ").Get<RabbitMQCo
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddApplicationServices(rabbitMQConfig!);
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(rabbitMQConfig!);
 
 var app = builder.Build();
 

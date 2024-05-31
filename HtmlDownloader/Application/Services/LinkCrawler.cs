@@ -3,17 +3,17 @@ using Domain.Interfaces;
 using MassTransit;
 using System.Collections.Concurrent;
 
-namespace Application.Consumers;
+namespace Application.Services;
 
-public class DownloadLinkConsumer : IConsumer<DownloadLink>
+public class LinkCrawler : ILinkCrawler
 {
     private static ConcurrentBag<Uri> _alreadySeen = new();
     private readonly ILinkExtractor _linkExtractor;
-    private readonly IUrlFilter _urlFilter;
+    private readonly ILinkFilter _urlFilter;
     private readonly IBus _messageBus;
 
-    public DownloadLinkConsumer(ILinkExtractor linkExtractor,
-        IUrlFilter urlFilter,
+    public LinkCrawler(ILinkExtractor linkExtractor,
+        ILinkFilter urlFilter,
         IBus messageBus)
     {
         _linkExtractor = linkExtractor;
@@ -21,9 +21,8 @@ public class DownloadLinkConsumer : IConsumer<DownloadLink>
         _messageBus = messageBus;
     }
 
-    public async Task Consume(ConsumeContext<DownloadLink> context)
+    public async Task Crawl(DownloadLink link)
     {
-        var link = context.Message;
         if (link == null)
         {
             return;
@@ -44,7 +43,7 @@ public class DownloadLinkConsumer : IConsumer<DownloadLink>
         }
 
         var baseLink = uri.GetLeftPart(UriPartial.Authority);
-        var filteredChildren = _urlFilter.FilterUrls(children, baseLink);
+        var filteredChildren = _urlFilter.Filter(children, baseLink);
         if (filteredChildren is null)
         {
             return;

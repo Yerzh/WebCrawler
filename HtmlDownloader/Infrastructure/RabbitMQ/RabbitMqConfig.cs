@@ -1,4 +1,4 @@
-﻿namespace Application.RabbitMq;
+﻿namespace Infrastructure.RabbitMq;
 
 public class RabbitMQConfig
 {
