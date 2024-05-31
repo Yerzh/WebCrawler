@@ -1,5 +1,6 @@
-﻿using Infrastructure.RabbitMq;
+﻿using Domain.Interfaces;
 using Infrastructure.RabbitMQ.Consumers;
+using Infrastructure.Redis;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -7,7 +8,7 @@ namespace Infrastructure;
 
 public static class ServiceRegistration
 {
-    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, RabbitMQConfig rabbitMQConfig)
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
     {
         services.AddMassTransit(x =>
         {
@@ -34,7 +35,9 @@ public static class ServiceRegistration
 
                 cfg.ConfigureEndpoints(context);
             });
-        });
+        });        
+
+        services.AddSingleton<ILinkVisitTracker, LinkVisitTracker>();
 
         return services;
     }

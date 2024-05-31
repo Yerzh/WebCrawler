@@ -1,24 +1,25 @@
 ﻿using Domain.DataContracts;
 using Domain.Interfaces;
 using MassTransit;
-using System.Collections.Concurrent;
 
 namespace Application.Services;
 
 public class LinkCrawler : ILinkCrawler
 {
-    private static ConcurrentBag<Uri> _alreadySeen = new();
     private readonly ILinkExtractor _linkExtractor;
     private readonly ILinkFilter _urlFilter;
     private readonly IBus _messageBus;
+    private readonly ILinkVisitTracker _visitTracker;
 
     public LinkCrawler(ILinkExtractor linkExtractor,
         ILinkFilter urlFilter,
-        IBus messageBus)
+        IBus messageBus,
+        ILinkVisitTracker visitTracker)
     {
         _linkExtractor = linkExtractor;
         _urlFilter = urlFilter;
         _messageBus = messageBus;
+        _visitTracker = visitTracker;
     }
 
     public async Task Crawl(DownloadLink link)
@@ -29,9 +30,10 @@ public class LinkCrawler : ILinkCrawler
         }
 
         var uri = new Uri(link.Url);
-        if (_alreadySeen.Contains(uri))
+
+        if (await _visitTracker.ContainsLink(uri))
             return;
-        _alreadySeen.Add(uri);
+        await _visitTracker.TrackLink(uri);
 
         Console.WriteLine(uri.ToString());
 
@@ -51,9 +53,9 @@ public class LinkCrawler : ILinkCrawler
 
         foreach (var childLink in filteredChildren)
         {
-            if (_alreadySeen.Contains(childLink))
+            if (await _visitTracker.ContainsLink(childLink))
                 continue;
-            _alreadySeen.Add(childLink);
+            await _visitTracker.TrackLink(childLink);
 
             await _messageBus.Publish(new DownloadLink()
             {

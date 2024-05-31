@@ -2,19 +2,19 @@ using Api.Dtos;
 using Api.Mappers;
 using Application;
 using Infrastructure;
-using Infrastructure.RabbitMq;
+using Infrastructure.Redis;
 using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var rabbitMQConfig = builder.Configuration.GetSection("RabbitMQ").Get<RabbitMQConfig>();
+builder.Services.Configure<RedisConfig>(builder.Configuration.GetSection("Redis"));
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddApplicationServices();
-builder.Services.AddInfrastructureServices(rabbitMQConfig!);
+builder.Services.AddInfrastructureServices();
 
 var app = builder.Build();
 
