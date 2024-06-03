@@ -10,7 +10,7 @@ public static class DownloadLinkMapper
         return new DownloadLink()
         {
             Type = link.Type,
-            Url = link.Url
+            Uri = link.Uri
         };
     }
 }

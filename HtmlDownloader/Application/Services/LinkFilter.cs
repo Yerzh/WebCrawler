@@ -1,4 +1,5 @@
 ﻿using Domain.Interfaces;
+using Domain.ValueObjects;
 
 namespace Application.Services;
 
@@ -8,17 +9,17 @@ public class LinkFilter : ILinkFilter
 
     private static readonly string[] allowedSchemes = ["http", "https"];
 
-    public IList<Uri> Filter(IList<string> urls, string baseUrl)
+    public IList<Link> Filter(IList<Link> links, string baseUrl)
     {
         Uri baseUri = new Uri(baseUrl);
 
-        return urls
-            .Where(url =>  !hrefsFilters.Contains(url))
-            .Select(url  => convertToAbsoluteUri(baseUri, new Uri(url)))
-            .Where(uri => allowedSchemes.Contains(uri.Scheme))
+        return links
+            .Where(link =>  !hrefsFilters.Contains(link.UriString))
+            .Select(link  => convertToAbsoluteUri(baseUri, link))
+            .Where(link => allowedSchemes.Contains(link.Uri.Scheme))
             .ToList();
     }
 
-    private static readonly Func<Uri, Uri, Uri> convertToAbsoluteUri = (baseUri, relativeUri)
-        => !relativeUri.IsAbsoluteUri ? new Uri(baseUri, relativeUri) : relativeUri;
+    private static readonly Func<Uri, Link, Link> convertToAbsoluteUri = (baseUri, relativeLink)
+        => !relativeLink.Uri.IsAbsoluteUri ? new Link(baseUri, relativeLink.UriString) : relativeLink;
 }

@@ -6,5 +6,5 @@ public record DownloadLink
 
     public required string Type { get; init; }
 
-    public required string Url { get; init; }
+    public required string Uri { get; init; }
 }

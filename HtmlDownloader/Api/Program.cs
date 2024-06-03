@@ -1,6 +1,7 @@
 using Api.Dtos;
 using Api.Mappers;
 using Application;
+using Domain.ValueObjects;
 using Infrastructure;
 using Infrastructure.Redis;
 using MassTransit;
@@ -29,6 +30,12 @@ app.UseHttpsRedirection();
 
 app.MapPost("/seed", async (DownloadLinkRequest request, IBus messageBus) =>
 {
+    var link = LinkFactory.Create(request.Uri);
+    if (link is null)
+    {
+        return Results.BadRequest($"{request.Uri} is not a valid uri");
+    }
+
     var contract = request.MapToContract();
 
     await messageBus.Publish(contract);

@@ -1,8 +1,10 @@
-﻿namespace Domain.Interfaces;
+﻿using Domain.ValueObjects;
+
+namespace Domain.Interfaces;
 
 public interface ILinkVisitTracker
 {
-    Task<bool> ContainsLink(Uri uri);
+    Task<bool> ContainsLink(Link link);
 
-    Task TrackLink(Uri uri);
+    Task TrackLink(Link link);
 }

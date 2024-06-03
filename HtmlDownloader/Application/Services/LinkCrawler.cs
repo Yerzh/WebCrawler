@@ -1,5 +1,6 @@
 ﻿using Domain.DataContracts;
 using Domain.Interfaces;
+using Domain.ValueObjects;
 using MassTransit;
 
 namespace Application.Services;
@@ -22,29 +23,33 @@ public class LinkCrawler : ILinkCrawler
         _visitTracker = visitTracker;
     }
 
-    public async Task Crawl(DownloadLink link)
+    public async Task Crawl(DownloadLink downloadLink)
     {
+        if (downloadLink == null)
+        {
+            return;
+        }
+
+        var link = LinkFactory.Create(downloadLink.Uri);
         if (link == null)
         {
             return;
         }
 
-        var uri = new Uri(link.Url);
-
-        if (await _visitTracker.ContainsLink(uri))
+        if (await _visitTracker.ContainsLink(link))
             return;
-        await _visitTracker.TrackLink(uri);
+        await _visitTracker.TrackLink(link);
 
-        Console.WriteLine(uri.ToString());
+        Console.WriteLine(link.UriString);
 
         CancellationTokenSource cancellationTokenSource = new();
-        var children = await _linkExtractor.ExtractAsync(uri.OriginalString, cancellationTokenSource.Token);
+        var children = await _linkExtractor.ExtractAsync(link, cancellationTokenSource.Token);
         if (children is null)
         {
             return;
         }
 
-        var baseLink = uri.GetLeftPart(UriPartial.Authority);
+        var baseLink = link.Uri.GetLeftPart(UriPartial.Authority);
         var filteredChildren = _urlFilter.Filter(children, baseLink);
         if (filteredChildren is null)
         {
@@ -59,8 +64,8 @@ public class LinkCrawler : ILinkCrawler
 
             await _messageBus.Publish(new DownloadLink()
             {
-                Type = childLink.GetLeftPart(UriPartial.Authority),
-                Url = childLink.OriginalString
+                Type = childLink.Uri.GetLeftPart(UriPartial.Authority),
+                Uri = childLink.UriString
             });
 
             Console.WriteLine(childLink.ToString());

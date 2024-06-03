@@ -1,27 +1,28 @@
 ﻿using Domain.Interfaces;
+using Domain.ValueObjects;
 using HtmlAgilityPack;
 
 namespace Application.Services;
 
 public class LinkExtractor : ILinkExtractor
 {
-    public async Task<IList<string>> ExtractAsync(string pageUrl, CancellationToken cancellationToken)
+    public async Task<IList<Link>> ExtractAsync(Link link, CancellationToken cancellationToken)
     {
         try
         {
             var web = new HtmlWeb();
-            var htmlDoc = await web.LoadFromWebAsync(pageUrl, cancellationToken);
+            var htmlDoc = await web.LoadFromWebAsync(link.UriString, cancellationToken);
             return ExtractLinks(htmlDoc);
         }
         catch
         {
-            return Enumerable.Empty<string>().ToList();
+            return Enumerable.Empty<Link>().ToList();
         }
     }
 
-    private IList<string> ExtractLinks(HtmlDocument doc)
+    private IList<Link> ExtractLinks(HtmlDocument doc)
     {
-        var result = new List<string>();
+        var result = new List<Link>();
 
         var hrefNodes = doc.DocumentNode.SelectNodes("//a[@href]");
         if (hrefNodes is null)
@@ -32,7 +33,11 @@ public class LinkExtractor : ILinkExtractor
         foreach (var node in hrefNodes)
         {
             string hrefValue = node.GetAttributeValue("href", string.Empty);
-            result.Add(hrefValue);
+            var link = LinkFactory.Create(hrefValue);
+            if (link != null)
+            {
+                result.Add(link);
+            }
         }
 
         return result;

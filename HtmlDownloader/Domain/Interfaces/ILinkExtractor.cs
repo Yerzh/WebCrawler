@@ -1,6 +1,8 @@
-﻿namespace Domain.Interfaces;
+﻿using Domain.ValueObjects;
+
+namespace Domain.Interfaces;
 
 public interface ILinkExtractor
 {
-    Task<IList<string>> ExtractAsync(string pageUrl, CancellationToken cancellationToken);
+    Task<IList<Link>> ExtractAsync(Link link, CancellationToken cancellationToken);
 }

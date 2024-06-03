@@ -1,4 +1,5 @@
 ﻿using Domain.Interfaces;
+using Domain.ValueObjects;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
@@ -20,18 +21,18 @@ public class LinkVisitTracker : ILinkVisitTracker, IDisposable
         _database = _redis.GetDatabase();
     }
 
-    public async Task<bool> ContainsLink(Uri uri)
+    public async Task<bool> ContainsLink(Link link)
     {
-        return await _database.SetContainsAsync(CacheKey, uri.OriginalString);
+        return await _database.SetContainsAsync(CacheKey, link.UriString);
     }
 
-    public async Task TrackLink(Uri uri)
+    public async Task TrackLink(Link link)
     {
         try
         {
             await _semaphore.WaitAsync();
 
-            await _database.SetAddAsync(CacheKey, uri.OriginalString);
+            await _database.SetAddAsync(CacheKey, link.UriString);
         }
         finally
         {
