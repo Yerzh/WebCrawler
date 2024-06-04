@@ -9,7 +9,7 @@ public class LinkFilter : ILinkFilter
 
     private static readonly string[] allowedSchemes = ["http", "https"];
 
-    public IList<Link> Filter(IList<Link> links, string baseUrl)
+    public IList<Link> Filter(IList<Link> links, string baseUrl, CancellationToken cancellationToken)
     {
         Uri baseUri = new Uri(baseUrl);
 

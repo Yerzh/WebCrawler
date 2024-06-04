@@ -11,6 +11,7 @@ public static class ServiceRegistration
         services.AddSingleton<ILinkExtractor, LinkExtractor>();
         services.AddSingleton<ILinkFilter, LinkFilter>();
         services.AddSingleton<ILinkCrawler, LinkCrawler>();
+        services.AddSingleton<IPolitenessPolicyProvider, DefaultPolitenessPolicyProvider>();
 
         return services;
     }

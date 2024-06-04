@@ -2,6 +2,7 @@
 using Domain.Interfaces;
 using Domain.ValueObjects;
 using MassTransit;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Services;
 
@@ -11,46 +12,40 @@ public class LinkCrawler : ILinkCrawler
     private readonly ILinkFilter _urlFilter;
     private readonly IBus _messageBus;
     private readonly ILinkVisitTracker _visitTracker;
+    private readonly ILogger<LinkCrawler> _logger;
 
     public LinkCrawler(ILinkExtractor linkExtractor,
         ILinkFilter urlFilter,
         IBus messageBus,
-        ILinkVisitTracker visitTracker)
+        ILinkVisitTracker visitTracker,
+        ILogger<LinkCrawler> logger)
     {
         _linkExtractor = linkExtractor;
         _urlFilter = urlFilter;
         _messageBus = messageBus;
         _visitTracker = visitTracker;
+        _logger = logger;
     }
 
-    public async Task Crawl(DownloadLink downloadLink)
+    public async Task Crawl(DownloadLink downloadLink, CancellationToken cancellationToken)
     {
-        if (downloadLink == null)
-        {
-            return;
-        }
-
         var link = LinkFactory.Create(downloadLink.Uri);
         if (link == null)
         {
             return;
         }
 
-        if (await _visitTracker.ContainsLink(link))
-            return;
-        await _visitTracker.TrackLink(link);
-
-        Console.WriteLine(link.UriString);
-
-        CancellationTokenSource cancellationTokenSource = new();
-        var children = await _linkExtractor.ExtractAsync(link, cancellationTokenSource.Token);
+        _logger.LogInformation(link.UriString);
+        
+        var children = await _linkExtractor.ExtractAsync(link, cancellationToken);
         if (children is null)
         {
             return;
         }
 
         var baseLink = link.Uri.GetLeftPart(UriPartial.Authority);
-        var filteredChildren = _urlFilter.Filter(children, baseLink);
+
+        var filteredChildren = _urlFilter.Filter(children, baseLink, cancellationToken);
         if (filteredChildren is null)
         {
             return;
@@ -58,17 +53,16 @@ public class LinkCrawler : ILinkCrawler
 
         foreach (var childLink in filteredChildren)
         {
-            if (await _visitTracker.ContainsLink(childLink))
+            if (await _visitTracker.ContainsLink(childLink, cancellationToken))
                 continue;
-            await _visitTracker.TrackLink(childLink);
+            await _visitTracker.TrackLink(link, cancellationToken);
 
             await _messageBus.Publish(new DownloadLink()
             {
                 Type = childLink.Uri.GetLeftPart(UriPartial.Authority),
                 Uri = childLink.UriString
-            });
-
-            Console.WriteLine(childLink.ToString());
+            },
+            cancellationToken);
         }
     }
 }

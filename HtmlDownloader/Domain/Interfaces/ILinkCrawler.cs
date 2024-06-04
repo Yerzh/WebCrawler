@@ -4,5 +4,5 @@ namespace Domain.Interfaces;
 
 public interface ILinkCrawler
 {
-    Task Crawl(DownloadLink link);
+    Task Crawl(DownloadLink link, CancellationToken cancellationToken);
 }

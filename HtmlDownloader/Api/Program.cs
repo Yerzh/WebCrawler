@@ -1,10 +1,12 @@
 using Api.Dtos;
 using Api.Mappers;
 using Application;
+using Domain.Interfaces;
 using Domain.ValueObjects;
 using Infrastructure;
 using Infrastructure.Redis;
 using MassTransit;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +19,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices();
 
+builder.Host.UseSerilog((context, configuration) =>
+    configuration.ReadFrom.Configuration(context.Configuration));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -28,7 +33,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapPost("/seed", async (DownloadLinkRequest request, IBus messageBus) =>
+app.UseSerilogRequestLogging();
+
+app.MapPost("/seed", async (DownloadLinkRequest request, IBus messageBus, ILinkVisitTracker linkVisitTracker) =>
 {
     var link = LinkFactory.Create(request.Uri);
     if (link is null)
@@ -36,8 +43,11 @@ app.MapPost("/seed", async (DownloadLinkRequest request, IBus messageBus) =>
         return Results.BadRequest($"{request.Uri} is not a valid uri");
     }
 
-    var contract = request.MapToContract();
+    CancellationTokenSource cancellationTokenSource = new();
 
+    await linkVisitTracker.TrackLink(link, cancellationTokenSource.Token);
+
+    var contract = request.MapToContract();
     await messageBus.Publish(contract);
 
     return Results.Created($"/downloadLinks/{contract.Id}", request);

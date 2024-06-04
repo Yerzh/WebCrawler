@@ -21,12 +21,12 @@ public class LinkVisitTracker : ILinkVisitTracker, IDisposable
         _database = _redis.GetDatabase();
     }
 
-    public async Task<bool> ContainsLink(Link link)
+    public async Task<bool> ContainsLink(Link link, CancellationToken cancellationToken)
     {
         return await _database.SetContainsAsync(CacheKey, link.UriString);
     }
 
-    public async Task TrackLink(Link link)
+    public async Task TrackLink(Link link, CancellationToken cancellationToken)
     {
         try
         {
