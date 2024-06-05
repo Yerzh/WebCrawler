@@ -6,7 +6,7 @@ services:
     container_name: web-api
     build:
       context: .
-      dockerfile: Api/Dockerfile
+      dockerfile: src/Api/Dockerfile
     depends_on:
       - rabbitmq
       - redis
