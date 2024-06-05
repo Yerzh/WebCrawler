@@ -1,4 +1,5 @@
-﻿using Domain.Interfaces;
+﻿using Application.Interfaces;
+using Domain.Interfaces;
 using Domain.ValueObjects;
 using HtmlAgilityPack;
 
@@ -6,12 +7,19 @@ namespace Application.Services;
 
 public class LinkExtractor : ILinkExtractor
 {
+    private readonly IHtmlWebWrapper _htmlWebWrapper;
+
+    public LinkExtractor(IHtmlWebWrapper htmlWebWrapper)
+    {
+        _htmlWebWrapper = htmlWebWrapper;
+    }
+
     public async Task<IList<Link>> ExtractAsync(Link link, CancellationToken cancellationToken)
     {
         try
         {
             var web = new HtmlWeb();
-            var htmlDoc = await web.LoadFromWebAsync(link.UriString, cancellationToken);
+            var htmlDoc = await _htmlWebWrapper.LoadFromWebAsync(link.UriString, cancellationToken);
             return ExtractLinks(htmlDoc);
         }
         catch

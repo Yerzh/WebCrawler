@@ -1,6 +1,8 @@
-﻿using Domain.Interfaces;
+﻿using Application.Interfaces;
+using Domain.Interfaces;
 using Infrastructure.RabbitMQ.Consumers;
 using Infrastructure.Redis;
+using Infrastructure.Services;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,24 +22,12 @@ public static class ServiceRegistration
             {
                 cfg.PrefetchCount = 1;
 
-                //cfg.Send<DownloadLink>(x =>
-                //{
-                //    // use customerType for the routing key
-                //    x.UseRoutingKeyFormatter(context => context.Message.Type);
-
-                //    // multiple conventions can be set, in this case also CorrelationId
-                //    x.UseCorrelationId(context => context.Id);
-                //});
-
-                //cfg.Message<DownloadLink>(x => x.SetEntityName("downloadlink"));
-
-                //cfg.Publish<DownloadLink>(x => x.ExchangeType = ExchangeType.Direct);
-
                 cfg.ConfigureEndpoints(context);
             });
         });        
 
         services.AddSingleton<ILinkVisitTracker, LinkVisitTracker>();
+        services.AddSingleton<IHtmlWebWrapper, HtmlWebWrapper>();
 
         return services;
     }
