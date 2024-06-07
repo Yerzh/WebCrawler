@@ -50,9 +50,11 @@ app.MapPost("/seed", async (DownloadLinkRequest request, IBus messageBus, ILinkV
     var contract = request.MapToContract();
     await messageBus.Publish(contract);
 
-    return Results.Created($"/downloadLinks/{contract.Id}", request);
+    return Results.Created();
 })
 .WithName("LinkSeeder")
 .WithOpenApi();
 
 app.Run();
+
+public partial class Program { }
